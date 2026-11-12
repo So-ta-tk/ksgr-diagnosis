@@ -1,0 +1,394 @@
+/* ==========================================================
+   結果ページ(X投稿用カード 横長 1200 x 675)
+   色・フォント・サイズ・余白は :root で一元管理しています。
+   見た目を変えたいときは、まずここだけを編集してください。
+   ========================================================== */
+:root {
+  /* ---- カラー ---- */
+  --color-page-bg: #0b0614;        /* ページ背景(カードの外側) */
+  --color-card-bg: #120b1e;        /* カードの背景 */
+  --color-panel: #1b1230;          /* キャラの面・説明欄の背景 */
+  --color-line: #2f2347;           /* 区切り線 */
+  --color-text: #e7defa;           /* 基本の文字色 */
+  --color-text-sub: #9a8fb5;       /* 説明などの薄い文字色 */
+  --color-text-dim: #8a7ea6;       /* 負けた側の言葉・フッター */
+  --color-title: #ffffff;          /* タイプ名・勝った側の言葉 */
+  --color-letter: #f3ecff;         /* 頭文字 */
+  --color-letter-word: #8b7fa8;    /* 頭文字の下の英単語 */
+  --color-accent: #ff5fd0;         /* アクセント(勝った側の棒・数値・ボタン) */
+  --color-on-accent: #1a0b2e;      /* アクセント背景の上の文字色 */
+  --color-bar-dim: #3a2d55;        /* 負けた側の棒 */
+
+  /* ---- フォント ---- */
+  --font-body: "DotGothic16", sans-serif;
+  --font-pixel: "Press Start 2P", monospace;
+
+  /* ---- 文字サイズ(カード) ---- */
+  --fs-letter: 88px;               /* 頭文字 */
+  --fs-letter-word: 14px;          /* 頭文字の下の英単語 */
+  --fs-name: 56px;                 /* タイプ名(長い名前は自動で縮む) */
+  --fs-catch: 22px;                /* 一行の説明 */
+  --fs-pole: 22px;                 /* 棒グラフの両端の言葉 */
+  --fs-pct: 18px;                  /* 数値 */
+  --fs-footer: 18px;
+  --fs-character-label: 24px;
+  --fs-character-size: 16px;
+
+  /* ---- 行間 ---- */
+  --lh-name: 1.1;
+  --lh-catch: 1.4;
+  --lh-pole: 26px;
+  --lh-footer: 24px;
+
+  /* ---- サイズ・余白(カード) ---- */
+  --card-width: 1200px;
+  --card-height: 675px;
+  --stage-padding-y: 48px;
+  --stage-padding-x: 56px;
+  --gap-stage: 16px;               /* 本体とフッターの間 */
+  --gap-main: 56px;                /* キャラと右側の間 */
+  --gap-right: 24px;               /* 頭文字・タイプ名・棒グラフの間 */
+  --gap-letters: 28px;             /* 頭文字どうしの間 */
+  --gap-letter: 8px;               /* 頭文字と英単語の間 */
+  --gap-title: 8px;                /* タイプ名と説明の間 */
+  --gap-axes: 18px;                /* 棒グラフどうしの間 */
+  --gap-axis: 8px;                 /* 言葉と棒の間 */
+  --gap-pole: 10px;                /* 言葉と数値の間 */
+  --character-width: 400px;
+  --bar-height: 8px;
+  --bar-gap: 2px;
+  --line-width: 1px;
+
+  /* タイプ名が入る幅(カード幅から余白・キャラの面を引いたもの)。
+     名前が長いときは、この幅に収まるよう文字サイズが自動で縮む */
+  --name-max-width: calc(
+    var(--card-width) - 2 * var(--stage-padding-x)
+    - var(--character-width) - var(--gap-main)
+  );
+  --name-fit: 0.96;                /* 幅に対する余裕(1.0 で目いっぱい) */
+
+  /* ---- 結果ページ(カードの外側)---- */
+  --page-max-width: 900px;
+  --page-padding-x: 20px;
+  --page-padding-y: 24px;
+  --gap-page: 24px;
+  --gap-actions: 12px;
+  --button-height: 52px;
+  --fs-button: 18px;
+  --desc-padding: 22px;
+  --fs-desc-heading: 20px;
+  --fs-desc-body: 15px;
+  --lh-desc: 1.9;
+}
+
+/* ---------- ベース ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--color-page-bg);
+}
+
+body {
+  color: var(--color-text);
+  font-family: var(--font-body);
+}
+
+/* ---------- 結果ページ全体 ---------- */
+.result-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-page);
+  width: 100%;
+  max-width: var(--page-max-width);
+  margin: 0 auto;
+  padding: var(--page-padding-y) var(--page-padding-x);
+}
+
+/* カードを画面の幅に合わせて縮小して見せる枠。
+   中の .stage(1200 x 675)を、枠の幅 ÷ 1200 倍に縮小する。
+   縮小は見た目だけで、画像に書き出すときは外す。 */
+.card-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  container-type: inline-size;
+}
+
+.card-frame .stage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  /* tan(atan2(a, b)) は「長さ ÷ 長さ」を数にする書き方 */
+  transform: scale(tan(atan2(100cqw, var(--card-width))));
+}
+
+/* ==========================================================
+   カード(画像として書き出す範囲)
+   ========================================================== */
+.stage {
+  flex: none;
+  width: var(--card-width);
+  height: var(--card-height);
+  padding: var(--stage-padding-y) var(--stage-padding-x);
+  background: var(--color-card-bg);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-stage);
+  width: 100%;
+  height: 100%;
+}
+
+.card__main {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  gap: var(--gap-main);
+}
+
+/* ---------- 左: キャラクター ---------- */
+.card__left {
+  display: flex;
+  flex: none;
+  width: var(--character-width);
+}
+
+.character {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: var(--color-panel);
+  text-align: center;
+}
+
+.character__label {
+  font-size: var(--fs-character-label);
+  color: var(--color-text-sub);
+}
+
+.character__size {
+  font-size: var(--fs-character-size);
+  color: var(--color-text-dim);
+}
+
+/* ドット絵の画像を入れたとき: ぼやけさせずに拡大する */
+.character__img {
+  display: block;
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+  background: var(--color-panel);
+}
+
+/* ---------- 右 ---------- */
+.card__right {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  gap: var(--gap-right);
+}
+
+/* 頭文字 */
+.letters {
+  display: flex;
+  gap: var(--gap-letters);
+}
+
+.letter {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-letter);
+}
+
+.letter__initial {
+  font-family: var(--font-pixel);
+  font-size: var(--fs-letter);
+  line-height: 1;
+  color: var(--color-letter);
+}
+
+.letter__word {
+  font-family: var(--font-pixel);
+  font-size: var(--fs-letter-word);
+  line-height: 1;
+  color: var(--color-letter-word);
+}
+
+/* タイプ名と説明 */
+.card__title {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-title);
+}
+
+/* 文字数は --name-chars に入れる(HTMLの style か、TypeScript から設定)。
+   通常は --fs-name の大きさで、長い名前だけ1行に収まるよう縮む */
+.card__name {
+  margin: 0;
+  white-space: nowrap;
+  font-size: min(var(--fs-name), calc(var(--name-max-width) * var(--name-fit) / var(--name-chars, 1)));
+  font-weight: normal;
+  line-height: var(--lh-name);
+  color: var(--color-title);
+}
+
+.card__catch {
+  margin: 0;
+  font-size: var(--fs-catch);
+  line-height: var(--lh-catch);
+  color: var(--color-text-sub);
+}
+
+/* ---------- 4軸の棒グラフ ---------- */
+.axes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-axes);
+  padding-top: var(--gap-right);
+  border-top: var(--line-width) solid var(--color-line);
+}
+
+.axis {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-axis);
+}
+
+.axis__labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: var(--fs-pole);
+  line-height: var(--lh-pole);
+}
+
+.axis__pole {
+  display: flex;
+  align-items: baseline;
+  gap: var(--gap-pole);
+  color: var(--color-text-dim);
+}
+
+.axis__pct {
+  font-size: var(--fs-pct);
+  color: var(--color-accent);
+}
+
+.axis__bar {
+  display: flex;
+  height: var(--bar-height);
+  gap: var(--bar-gap);
+}
+
+.axis__fill {
+  background: var(--color-bar-dim);
+}
+
+/* 勝った側(data-win が left / right)を目立たせる */
+.axis[data-win="left"] .axis__pole--left,
+.axis[data-win="right"] .axis__pole--right {
+  color: var(--color-title);
+}
+
+.axis[data-win="left"] .axis__fill--left,
+.axis[data-win="right"] .axis__fill--right {
+  background: var(--color-accent);
+}
+
+/* 負けた側の数値は出さない */
+.axis[data-win="left"] .axis__pole--right .axis__pct,
+.axis[data-win="right"] .axis__pole--left .axis__pct {
+  display: none;
+}
+
+/* ---------- フッター ---------- */
+.card__footer {
+  display: flex;
+  flex: none;
+  justify-content: space-between;
+  font-size: var(--fs-footer);
+  line-height: var(--lh-footer);
+  color: var(--color-text-dim);
+}
+
+/* ==========================================================
+   カードの外側(画像には入らない)
+   ========================================================== */
+
+/* ---------- ボタン ---------- */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-actions);
+}
+
+.button {
+  flex: 1 1 200px;
+  height: var(--button-height);
+  border: 0;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-family: var(--font-body);
+  font-size: var(--fs-button);
+  cursor: pointer;
+}
+
+.button[hidden] {
+  display: none;
+}
+
+.button:hover {
+  filter: brightness(1.1);
+}
+
+.button:focus-visible {
+  outline: 3px solid var(--color-text);
+  outline-offset: 3px;
+}
+
+.button--sub {
+  background: var(--color-panel);
+  color: var(--color-text);
+}
+
+/* ---------- タイプの特徴の説明 ---------- */
+.description {
+  padding: var(--desc-padding);
+  background: var(--color-panel);
+}
+
+.description__heading {
+  margin: 0 0 12px;
+  font-size: var(--fs-desc-heading);
+  font-weight: normal;
+  color: var(--color-title);
+}
+
+.description__text {
+  margin: 0;
+  font-size: var(--fs-desc-body);
+  line-height: var(--lh-desc);
+  color: var(--color-text);
+}
+
+.description__text + .description__text {
+  margin-top: 1em;
+}
