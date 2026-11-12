@@ -156,6 +156,19 @@ body {
   gap: var(--gap-main);
 }
 
+.card__name-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.card__role {
+  margin-left: auto;
+  font-size: 30px;
+  color: #888;
+  white-space: nowrap;
+}
+
 /* ---------- 左: キャラクター ---------- */
 .card__left {
   display: flex;
