@@ -170,7 +170,7 @@ if (data) {
   console.log("得点:", data.scores);
   console.log("KSGR:", data.KSGR);
   console.log("優勢度:", data.rate);
-
+  console.log("role:",data.role);
   AXES.forEach((def) => {
     renderAxis(def, data.KSGR, data.rate);
   });
@@ -180,6 +180,11 @@ if (data) {
   if(type){
     setTypeName(type?.type_name);
     setTypecatch(type?.type_explain);
+    const cardRole = document.getElementById("card-role");
+
+  if (cardRole) {
+    cardRole.textContent = `as ${data.role}`;
+  }
   };
   
 
@@ -187,3 +192,14 @@ if (data) {
   // 診断結果からタイプ名が決まったら、ここで次のように呼ぶ:
   // setTypeName("小悪魔な恋人");
 }
+
+// もう一度診断するボタン ====================================
+const retryButton = document.getElementById("retry-button");
+
+retryButton?.addEventListener("click", () => {
+  // 保存している診断結果を削除
+  sessionStorage.removeItem("diagnosisData");
+
+  // ホーム画面に戻る
+  window.location.href = "../index.html";
+});
